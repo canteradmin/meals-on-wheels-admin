@@ -1,0 +1,244 @@
+@import "../../styles/theme.scss";
+
+.recent-orders {
+  .orders-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    gap: 20px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .header-content {
+      h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: $secondary;
+        margin-bottom: 8px;
+      }
+
+      p {
+        font-size: 16px;
+        color: $gray;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+
+      @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-select {
+        padding: 10px 15px;
+        border: 2px solid $border;
+        border-radius: 8px;
+        background: $white;
+        font-size: 14px;
+        min-width: 150px;
+
+        &:focus {
+          outline: none;
+          border-color: $primary;
+        }
+      }
+    }
+  }
+}
+
+.orders-table-container {
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px $shadow;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid $border;
+  }
+
+  th {
+    background-color: $lightGray;
+    font-weight: 600;
+    color: $secondary;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  tr:hover {
+    background-color: rgba($primary, 0.02);
+  }
+
+  .order-id {
+    font-weight: 600;
+    color: $primary;
+    font-family: "Courier New", monospace;
+  }
+
+  .customer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .customer-name {
+      font-weight: 600;
+      color: $secondary;
+    }
+
+    .customer-address {
+      font-size: 12px;
+      color: $gray;
+    }
+  }
+
+  .order-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    .item-tag {
+      background: rgba($primary, 0.1);
+      color: $primary;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
+
+  .order-total {
+    font-weight: 600;
+    color: $secondary;
+    font-size: 16px;
+  }
+
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+
+    &.status-pending {
+      background: rgba($warning, 0.1);
+      color: $warning;
+    }
+
+    &.status-preparing {
+      background: rgba($primary, 0.1);
+      color: $primary;
+    }
+
+    &.status-delivered {
+      background: rgba($success, 0.1);
+      color: $success;
+    }
+
+    &.status-cancelled {
+      background: rgba($error, 0.1);
+      color: $error;
+    }
+  }
+
+  .order-time {
+    font-size: 12px;
+    color: $gray;
+  }
+
+  .order-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+  }
+}
+
+.no-orders {
+  text-align: center;
+  padding: 60px 20px;
+  background: $white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px $shadow;
+
+  .no-orders-icon {
+    font-size: 48px;
+    margin-bottom: 20px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: $secondary;
+    margin-bottom: 8px;
+  }
+
+  p {
+    color: $gray;
+    font-size: 16px;
+  }
+}
+
+// Responsive table
+@media (max-width: 1024px) {
+  .orders-table {
+    th,
+    td {
+      padding: 12px 8px;
+      font-size: 14px;
+    }
+
+    .order-actions {
+      flex-direction: column;
+
+      .btn-sm {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .orders-table {
+    th,
+    td {
+      padding: 8px 4px;
+      font-size: 12px;
+    }
+
+    .customer-info {
+      .customer-address {
+        display: none;
+      }
+    }
+
+    .order-items {
+      .item-tag {
+        font-size: 10px;
+        padding: 2px 6px;
+      }
+    }
+  }
+}
