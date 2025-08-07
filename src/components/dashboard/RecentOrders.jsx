@@ -1,85 +1,93 @@
 import React, { useState, useEffect } from "react";
-import { orderAPI, handleAPIError, formatOrderData } from "../../services/api";
 import "./RecentOrders.scss";
 
 const RecentOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchOrders();
-  }, [filterStatus, currentPage]);
+    // Simulate loading delay
+    setTimeout(() => {
+      const mockOrders = [
+        {
+          id: "order_001",
+          orderNumber: "#1234",
+          customer: { name: "John Doe", phone: "+91 9876543210" },
+          items: [
+            { name: "Chicken Biryani", quantity: 2, price: 350 },
+            { name: "Naan Bread", quantity: 3, price: 30 },
+          ],
+          totalAmount: 790,
+          status: "placed",
+          createdAt: "2024-01-15T10:30:00Z",
+          deliveryAddress: "123 Main St, Mumbai, Maharashtra",
+          paymentMethod: "online",
+          estimatedDeliveryTime: "2024-01-15T11:30:00Z",
+        },
+        {
+          id: "order_002",
+          orderNumber: "#1233",
+          customer: { name: "Jane Smith", phone: "+91 9876543211" },
+          items: [
+            { name: "Butter Chicken", quantity: 1, price: 380 },
+            { name: "Rice", quantity: 1, price: 80 },
+          ],
+          totalAmount: 460,
+          status: "preparing",
+          createdAt: "2024-01-15T09:15:00Z",
+          deliveryAddress: "456 Oak Ave, Mumbai, Maharashtra",
+          paymentMethod: "cod",
+          estimatedDeliveryTime: "2024-01-15T10:30:00Z",
+        },
+        {
+          id: "order_003",
+          orderNumber: "#1232",
+          customer: { name: "Mike Johnson", phone: "+91 9876543212" },
+          items: [
+            { name: "Tandoori Chicken", quantity: 1, price: 420 },
+            { name: "Raita", quantity: 1, price: 60 },
+          ],
+          totalAmount: 480,
+          status: "delivered",
+          createdAt: "2024-01-15T08:00:00Z",
+          deliveryAddress: "789 Pine Rd, Mumbai, Maharashtra",
+          paymentMethod: "online",
+          estimatedDeliveryTime: "2024-01-15T09:00:00Z",
+        },
+      ];
 
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const params = {
-        page: currentPage,
-        limit: 10,
-      };
-
-      if (filterStatus !== "all") {
-        params.status = filterStatus;
-      }
-
-      const response = await orderAPI.getOrders(params);
-      const formattedOrders = (response.data.orders || []).map(formatOrderData);
-
-      setOrders(formattedOrders);
-      setTotalPages(response.data.totalPages || 1);
-    } catch (err) {
-      const errorMessage = handleAPIError(err);
-      setError(errorMessage);
-      console.error("Orders fetch error:", err);
-    } finally {
+      setOrders(mockOrders);
       setLoading(false);
-    }
-  };
-
-  const updateOrderStatus = async (orderId, newStatus) => {
-    try {
-      await orderAPI.updateOrderStatus(orderId, {
-        status: newStatus,
-        message: `Order status updated to ${newStatus}`,
-      });
-
-      // Update local state
-      setOrders(
-        orders.map((order) =>
-          order.id === orderId ? { ...order, status: newStatus } : order
-        )
-      );
-    } catch (err) {
-      const errorMessage = handleAPIError(err);
-      console.error("Update order status error:", err);
-      alert(`Failed to update order status: ${errorMessage}`);
-    }
-  };
+    }, 1000);
+  }, []);
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case "placed":
-        return "warning";
-      case "confirmed":
-        return "info";
-      case "preparing":
-        return "primary";
-      case "out_for_delivery":
-        return "info";
-      case "delivered":
-        return "success";
-      case "cancelled":
-      case "rejected":
-        return "error";
-      default:
-        return "gray";
-    }
+    const statusColors = {
+      placed: "#ff6b6b",
+      confirmed: "#4ecdc4",
+      preparing: "#45b7d1",
+      out_for_delivery: "#96ceb4",
+      delivered: "#60b246",
+      cancelled: "#ff6b6b",
+      rejected: "#ff6b6b",
+    };
+    return statusColors[status] || "#686b78";
+  };
+
+  const getStatusDisplayName = (status) => {
+    const statusNames = {
+      placed: "Placed",
+      confirmed: "Confirmed",
+      preparing: "Preparing",
+      out_for_delivery: "Out for Delivery",
+      delivered: "Delivered",
+      cancelled: "Cancelled",
+      rejected: "Rejected",
+    };
+    return statusNames[status] || status;
   };
 
   const formatCurrency = (amount) => {
@@ -89,37 +97,29 @@ const RecentOrders = () => {
     }).format(amount);
   };
 
-  const getStatusDisplayName = (status) => {
-    const statusMap = {
-      placed: "Pending",
-      confirmed: "Confirmed",
-      preparing: "Preparing",
-      out_for_delivery: "Out for Delivery",
-      delivered: "Delivered",
-      cancelled: "Cancelled",
-      rejected: "Rejected",
-    };
-    return statusMap[status] || status;
+  const updateOrderStatus = (orderId, newStatus) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
   };
 
-  const getNextStatus = (currentStatus) => {
-    const statusFlow = {
-      placed: "confirmed",
-      confirmed: "preparing",
-      preparing: "out_for_delivery",
-      out_for_delivery: "delivered",
-    };
-    return statusFlow[currentStatus];
-  };
+  const filteredOrders = orders.filter((order) => {
+    const matchesStatus =
+      statusFilter === "all" || order.status === statusFilter;
+    const matchesSearch =
+      order.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
 
   if (loading) {
     return (
       <div className="recent-orders">
         <div className="orders-header">
-          <div className="header-content">
-            <h2>Recent Orders</h2>
-            <p>Manage and track all customer orders</p>
-          </div>
+          <h2>Recent Orders</h2>
+          <p>Manage and track customer orders</p>
         </div>
         <div className="loading-container">
           <div className="loading-spinner"></div>
@@ -129,210 +129,128 @@ const RecentOrders = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="recent-orders">
-        <div className="orders-header">
-          <div className="header-content">
-            <h2>Recent Orders</h2>
-            <p>Manage and track all customer orders</p>
-          </div>
-        </div>
-        <div className="error-container">
-          <div className="error-icon">⚠️</div>
-          <h3>Error Loading Orders</h3>
-          <p>{error}</p>
-          <button className="btn btn--primary" onClick={fetchOrders}>
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="recent-orders">
       <div className="orders-header">
-        <div className="header-content">
-          <h2>Recent Orders</h2>
-          <p>Manage and track all customer orders</p>
+        <h2>Recent Orders</h2>
+        <p>Manage and track customer orders</p>
+      </div>
+
+      <div className="orders-controls">
+        <div className="filters">
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Search orders..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="status-filter">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All Status</option>
+              <option value="placed">Placed</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="preparing">Preparing</option>
+              <option value="out_for_delivery">Out for Delivery</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
         </div>
-        <div className="header-actions">
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Orders</option>
-            <option value="placed">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="preparing">Preparing</option>
-            <option value="out_for_delivery">Out for Delivery</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="rejected">Rejected</option>
-          </select>
-          <button className="btn btn--primary">Export Orders</button>
+
+        <div className="actions">
+          <button className="btn btn--secondary">Export Orders</button>
         </div>
       </div>
 
-      <div className="orders-table-container">
-        <table className="orders-table">
+      <div className="orders-table">
+        <table>
           <thead>
             <tr>
-              <th>Order ID</th>
+              <th>Order #</th>
               <th>Customer</th>
               <th>Items</th>
               <th>Total</th>
               <th>Status</th>
-              <th>Time</th>
+              <th>Date</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <tr key={order.id}>
                 <td>
-                  <span className="order-id">{order.orderNumber}</span>
+                  <strong>{order.orderNumber}</strong>
                 </td>
                 <td>
                   <div className="customer-info">
-                    <span className="customer-name">{order.customerName}</span>
-                    <span className="customer-phone">
-                      {order.customerPhone}
-                    </span>
-                    <span className="customer-address">
-                      {order.deliveryAddress}
-                    </span>
+                    <p className="customer-name">{order.customer.name}</p>
+                    <p className="customer-phone">{order.customer.phone}</p>
                   </div>
                 </td>
                 <td>
                   <div className="order-items">
                     {order.items.map((item, index) => (
-                      <span key={index} className="item-tag">
-                        {item.name} (x{item.quantity})
+                      <span key={index} className="item">
+                        {item.quantity}x {item.name}
                       </span>
                     ))}
                   </div>
                 </td>
                 <td>
-                  <span className="order-total">
-                    {formatCurrency(order.totalAmount)}
-                  </span>
+                  <strong>{formatCurrency(order.totalAmount)}</strong>
                 </td>
                 <td>
                   <span
-                    className={`status-badge status-${getStatusColor(
-                      order.status
-                    )}`}
+                    className="status-badge"
+                    style={{ backgroundColor: getStatusColor(order.status) }}
                   >
                     {getStatusDisplayName(order.status)}
                   </span>
                 </td>
                 <td>
-                  <div className="order-time">
-                    <div>{order.orderDate}</div>
-                    <div className="time-small">{order.orderTime}</div>
+                  <div className="order-date">
+                    <p>{new Date(order.createdAt).toLocaleDateString()}</p>
+                    <p className="time">
+                      {new Date(order.createdAt).toLocaleTimeString()}
+                    </p>
                   </div>
                 </td>
                 <td>
                   <div className="order-actions">
-                    {order.status === "placed" && (
-                      <>
-                        <button
-                          className="btn btn--success btn-sm"
-                          onClick={() =>
-                            updateOrderStatus(order.id, "confirmed")
-                          }
-                        >
-                          Accept
-                        </button>
-                        <button
-                          className="btn btn--danger btn-sm"
-                          onClick={() =>
-                            updateOrderStatus(order.id, "rejected")
-                          }
-                        >
-                          Reject
-                        </button>
-                      </>
-                    )}
-                    {order.status === "confirmed" && (
-                      <button
-                        className="btn btn--primary btn-sm"
-                        onClick={() => updateOrderStatus(order.id, "preparing")}
-                      >
-                        Start Preparing
-                      </button>
-                    )}
-                    {order.status === "preparing" && (
-                      <button
-                        className="btn btn--primary btn-sm"
-                        onClick={() =>
-                          updateOrderStatus(order.id, "out_for_delivery")
-                        }
-                      >
-                        Ready for Delivery
-                      </button>
-                    )}
-                    {order.status === "out_for_delivery" && (
-                      <button
-                        className="btn btn--success btn-sm"
-                        onClick={() => updateOrderStatus(order.id, "delivered")}
-                      >
-                        Mark Delivered
-                      </button>
-                    )}
-                    {["placed", "confirmed", "preparing"].includes(
-                      order.status
-                    ) && (
-                      <button
-                        className="btn btn--danger btn-sm"
-                        onClick={() => updateOrderStatus(order.id, "cancelled")}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                    <button className="btn btn--secondary btn-sm">
-                      View Details
-                    </button>
+                    <select
+                      value={order.status}
+                      onChange={(e) =>
+                        updateOrderStatus(order.id, e.target.value)
+                      }
+                      className="status-select"
+                    >
+                      <option value="placed">Placed</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="preparing">Preparing</option>
+                      <option value="out_for_delivery">Out for Delivery</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button className="btn btn--small">View</button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+
+        {filteredOrders.length === 0 && (
+          <div className="no-orders">
+            <p>No orders found matching your criteria.</p>
+          </div>
+        )}
       </div>
-
-      {orders.length === 0 && (
-        <div className="no-orders">
-          <div className="no-orders-icon">📋</div>
-          <h3>No orders found</h3>
-          <p>There are no orders matching your current filter.</p>
-        </div>
-      )}
-
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button
-            className="btn btn--secondary"
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(currentPage - 1)}
-          >
-            Previous
-          </button>
-          <span className="page-info">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="btn btn--secondary"
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(currentPage + 1)}
-          >
-            Next
-          </button>
-        </div>
-      )}
     </div>
   );
 };

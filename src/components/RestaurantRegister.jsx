@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { authAPI, handleAPIError, tokenManager } from "../services/api";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../App";
 import "./RestaurantRegister.scss";
 
 const RestaurantRegister = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [formData, setFormData] = useState({
@@ -29,18 +30,26 @@ const RestaurantRegister = () => {
   }, [location]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: value,
+      [e.target.name]: e.target.value,
     });
 
     // Clear error when user starts typing
-    if (errors[name]) {
+    if (errors[e.target.name]) {
       setErrors({
         ...errors,
-        [name]: "",
+        [e.target.name]: "",
       });
+    }
+  };
+
+  const handleAccessSubmit = (e) => {
+    e.preventDefault();
+    if (accessPassword === "karthik1610") {
+      setAccessGranted(true);
+    } else {
+      alert("Invalid access password!");
     }
   };
 
@@ -95,109 +104,70 @@ const RestaurantRegister = () => {
 
     setIsLoading(true);
 
-    try {
-      const userData = {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim(),
-        password: formData.password,
-        role: "restaurant_owner",
-      };
+    // Simulate registration delay
+    setTimeout(() => {
+      try {
+        // Create user data
+        const userData = {
+          id: `user_${Date.now()}`,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          role: "restaurant_owner",
+          restaurantId: `rest_${Date.now()}`,
+        };
 
-      const response = await authAPI.register(userData);
-
-      if (response.success) {
         // Auto-login after successful registration
-        const loginResponse = await authAPI.login({
-          email: formData.email,
-          password: formData.password,
-        });
+        login(userData);
 
-        if (loginResponse.success) {
-          // Store user data and token using tokenManager
-          const userData = {
-            ...loginResponse.data.user,
-            token: loginResponse.data.token,
-          };
-
-          // Use tokenManager to set token
-          tokenManager.setToken(loginResponse.data.token);
-
-          localStorage.setItem("isAuthenticated", "true");
-          localStorage.setItem("user", JSON.stringify(userData));
-
-          // Redirect to dashboard
-          navigate("/dashboard");
-        }
+        // Navigate to dashboard
+        navigate("/dashboard");
+      } catch (error) {
+        console.error("Registration error:", error);
+        alert("Registration failed. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      const errorMessage = handleAPIError(error);
-      setErrors({ general: errorMessage });
-    } finally {
-      setIsLoading(false);
-    }
+    }, 1500);
   };
 
-  const handleAccessSubmit = (e) => {
-    e.preventDefault();
-    if (accessPassword === "karthik1610") {
-      setAccessGranted(true);
-    } else {
-      setErrors({ access: "Invalid access password" });
-    }
-  };
-
-  // Show access password form if not granted access
   if (!accessGranted) {
     return (
-      <div className="restaurant-register">
+      <div className="register-container">
         <div className="register-card">
           <div className="register-header">
-            <div className="logo">
-              <h1>🍽️ Meels on Wheels</h1>
-              <p>Restaurant Registration</p>
+            <h1>🔐 Access Required</h1>
+            <p>Enter the access password to register your restaurant</p>
+          </div>
+
+          <form onSubmit={handleAccessSubmit} className="access-form">
+            <div className="form-group">
+              <label htmlFor="accessPassword">Access Password</label>
+              <input
+                type="password"
+                id="accessPassword"
+                value={accessPassword}
+                onChange={(e) => setAccessPassword(e.target.value)}
+                placeholder="Enter access password"
+                required
+              />
             </div>
-          </div>
 
-          <div className="access-form">
-            <h2>Access Required</h2>
-            <p>Please enter the access password to register your restaurant.</p>
-
-            <form onSubmit={handleAccessSubmit}>
-              <div className="form-group">
-                <label htmlFor="accessPassword">Access Password</label>
-                <input
-                  type="password"
-                  id="accessPassword"
-                  value={accessPassword}
-                  onChange={(e) => setAccessPassword(e.target.value)}
-                  placeholder="Enter access password"
-                  required
-                />
-              </div>
-
-              {errors.access && (
-                <div className="error-message">{errors.access}</div>
-              )}
-
-              <button type="submit" className="btn btn--primary">
-                Continue
-              </button>
-            </form>
-          </div>
+            <button type="submit" className="btn btn--primary">
+              Continue to Registration
+            </button>
+          </form>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="restaurant-register">
+    <div className="register-container">
       <div className="register-card">
         <div className="register-header">
-          <div className="logo">
-            <h1>🍽️ Meels on Wheels</h1>
-            <p>Restaurant Registration</p>
-          </div>
+          <h1>🍽️ Restaurant Registration</h1>
+          <p>Create your restaurant admin account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="register-form">
@@ -284,30 +254,14 @@ const RestaurantRegister = () => {
             )}
           </div>
 
-          {errors.general && (
-            <div className="error-message">{errors.general}</div>
-          )}
-
           <button
             type="submit"
-            className={`btn btn--primary register-btn ${
-              isLoading ? "loading" : ""
-            }`}
+            className="btn btn--primary register-btn"
             disabled={isLoading}
           >
             {isLoading ? "Creating Account..." : "Register Restaurant"}
           </button>
         </form>
-
-        <div className="register-footer">
-          <p>Already have an account?</p>
-          <button
-            className="btn btn--secondary"
-            onClick={() => navigate("/login")}
-          >
-            Sign In
-          </button>
-        </div>
       </div>
     </div>
   );

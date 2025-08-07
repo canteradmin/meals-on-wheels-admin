@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../App";
-import { authAPI, handleAPIError, tokenManager } from "../services/api";
 import "./Login.scss";
 
 const Login = () => {
@@ -31,29 +30,28 @@ const Login = () => {
     setError("");
     setIsLoading(true);
 
-    try {
-      const response = await authAPI.login(formData);
-
-      if (response.success) {
-        // Store user data and token using tokenManager
+    // Simulate API delay
+    setTimeout(() => {
+      // Demo credentials check
+      if (
+        formData.email === "admin@meels.com" &&
+        formData.password === "admin123"
+      ) {
         const userData = {
-          ...response.data.user,
-          token: response.data.token,
+          id: "user_001",
+          name: "Admin User",
+          email: formData.email,
+          role: "restaurant_owner",
+          restaurantId: "rest_123456",
         };
-
-        // Use tokenManager to set token
-        tokenManager.setToken(response.data.token);
 
         login(userData);
         // Navigation will be handled automatically by the App component
+      } else {
+        setError("Invalid email or password");
       }
-    } catch (err) {
-      const errorMessage = handleAPIError(err);
-      setError(errorMessage);
-      console.error("Login error:", err);
-    } finally {
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
   return (
@@ -77,6 +75,7 @@ const Login = () => {
               onChange={handleChange}
               placeholder="Enter your email"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -90,6 +89,7 @@ const Login = () => {
               onChange={handleChange}
               placeholder="Enter your password"
               required
+              disabled={isLoading}
             />
           </div>
 

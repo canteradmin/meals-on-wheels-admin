@@ -8,7 +8,6 @@ import {
 import Login from "./components/Login";
 import RestaurantRegister from "./components/RestaurantRegister";
 import Dashboard from "./components/Dashboard";
-import { tokenManager } from "./services/api";
 import "./styles/global.scss";
 
 // Create authentication context
@@ -45,8 +44,8 @@ function App() {
   };
 
   const logout = () => {
-    // Use tokenManager to remove token
-    tokenManager.removeToken();
+    localStorage.removeItem("user");
+    localStorage.removeItem("isAuthenticated");
     setIsAuthenticated(false);
     setUser(null);
   };

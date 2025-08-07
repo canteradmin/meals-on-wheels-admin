@@ -1,127 +1,132 @@
 import React, { useState, useEffect } from "react";
-import { supportAPI, handleAPIError } from "../../services/api";
 import "./CustomerHelp.scss";
 
 const CustomerHelp = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterPriority, setFilterPriority] = useState("all");
   const [selectedTicket, setSelectedTicket] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetchSupportQueries();
-  }, [filterStatus, filterPriority, currentPage]);
+    // Simulate loading delay
+    setTimeout(() => {
+      const mockTickets = [
+        {
+          id: "T001",
+          customerName: "Alice Johnson",
+          customerEmail: "alice@example.com",
+          customerPhone: "+91 9876543213",
+          subject: "Order not delivered on time",
+          message:
+            "I placed an order 2 hours ago and it still hasn't been delivered. The estimated delivery time was 45 minutes.",
+          status: "open",
+          priority: "high",
+          createdAt: "2024-01-15T08:30:00Z",
+          assignedTo: "support_team",
+        },
+        {
+          id: "T002",
+          customerName: "Bob Smith",
+          customerEmail: "bob@example.com",
+          customerPhone: "+91 9876543214",
+          subject: "Wrong item received",
+          message:
+            "I ordered Chicken Biryani but received Butter Chicken instead. Please help me resolve this issue.",
+          status: "in_progress",
+          priority: "medium",
+          createdAt: "2024-01-15T06:45:00Z",
+          assignedTo: "admin",
+        },
+        {
+          id: "T003",
+          customerName: "Carol Davis",
+          customerEmail: "carol@example.com",
+          customerPhone: "+91 9876543215",
+          subject: "Payment refund request",
+          message:
+            "I would like to request a refund for my last order as the food was cold when it arrived.",
+          status: "resolved",
+          priority: "low",
+          createdAt: "2024-01-14T15:20:00Z",
+          assignedTo: "support_team",
+        },
+      ];
 
-  const fetchSupportQueries = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const params = {
-        page: currentPage,
-        limit: 10,
-      };
-
-      if (filterStatus !== "all") {
-        params.status = filterStatus;
-      }
-
-      const response = await supportAPI.getSupportQueries(params);
-      setTickets(response.data.tickets || []);
-      setTotalPages(response.data.totalPages || 1);
-    } catch (err) {
-      const errorMessage = handleAPIError(err);
-      setError(errorMessage);
-      console.error("Support queries fetch error:", err);
-    } finally {
+      setTickets(mockTickets);
       setLoading(false);
-    }
-  };
-
-  const updateTicketStatus = async (ticketId, newStatus) => {
-    try {
-      // This would be a separate API call to update ticket status
-      // For now, we'll update local state
-      setTickets(
-        tickets.map((ticket) =>
-          ticket.id === ticketId ? { ...ticket, status: newStatus } : ticket
-        )
-      );
-
-      if (selectedTicket && selectedTicket.id === ticketId) {
-        setSelectedTicket({ ...selectedTicket, status: newStatus });
-      }
-    } catch (err) {
-      const errorMessage = handleAPIError(err);
-      console.error("Update ticket status error:", err);
-      alert(`Failed to update ticket status: ${errorMessage}`);
-    }
-  };
-
-  const assignTicket = async (ticketId, assignee) => {
-    try {
-      // This would be a separate API call to assign ticket
-      // For now, we'll update local state
-      setTickets(
-        tickets.map((ticket) =>
-          ticket.id === ticketId ? { ...ticket, assignedTo: assignee } : ticket
-        )
-      );
-
-      if (selectedTicket && selectedTicket.id === ticketId) {
-        setSelectedTicket({ ...selectedTicket, assignedTo: assignee });
-      }
-    } catch (err) {
-      const errorMessage = handleAPIError(err);
-      console.error("Assign ticket error:", err);
-      alert(`Failed to assign ticket: ${errorMessage}`);
-    }
-  };
+    }, 1000);
+  }, []);
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case "open":
-        return "warning";
-      case "in_progress":
-        return "primary";
-      case "resolved":
-        return "success";
-      case "closed":
-        return "gray";
-      default:
-        return "gray";
-    }
+    const statusColors = {
+      open: "#ff6b6b",
+      in_progress: "#45b7d1",
+      resolved: "#60b246",
+      closed: "#686b78",
+    };
+    return statusColors[status] || "#686b78";
   };
 
   const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "high":
-        return "error";
-      case "medium":
-        return "warning";
-      case "low":
-        return "success";
-      default:
-        return "gray";
-    }
+    const priorityColors = {
+      high: "#ff6b6b",
+      medium: "#ffa726",
+      low: "#60b246",
+    };
+    return priorityColors[priority] || "#686b78";
   };
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString();
+  const getStatusDisplayName = (status) => {
+    const statusNames = {
+      open: "Open",
+      in_progress: "In Progress",
+      resolved: "Resolved",
+      closed: "Closed",
+    };
+    return statusNames[status] || status;
   };
+
+  const getPriorityDisplayName = (priority) => {
+    const priorityNames = {
+      high: "High",
+      medium: "Medium",
+      low: "Low",
+    };
+    return priorityNames[priority] || priority;
+  };
+
+  const updateTicketStatus = (ticketId, newStatus) => {
+    setTickets((prevTickets) =>
+      prevTickets.map((ticket) =>
+        ticket.id === ticketId ? { ...ticket, status: newStatus } : ticket
+      )
+    );
+  };
+
+  const assignTicket = (ticketId, assignee) => {
+    setTickets((prevTickets) =>
+      prevTickets.map((ticket) =>
+        ticket.id === ticketId ? { ...ticket, assignedTo: assignee } : ticket
+      )
+    );
+  };
+
+  const filteredTickets = tickets.filter((ticket) => {
+    const matchesStatus =
+      statusFilter === "all" || ticket.status === statusFilter;
+    const matchesSearch =
+      ticket.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.subject.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
 
   if (loading) {
     return (
       <div className="customer-help">
         <div className="help-header">
-          <div className="header-content">
-            <h2>Customer Help Desk</h2>
-            <p>Manage customer support tickets and queries</p>
-          </div>
+          <h2>Customer Support</h2>
+          <p>Manage customer inquiries and support tickets</p>
         </div>
         <div className="loading-container">
           <div className="loading-spinner"></div>
@@ -131,260 +136,215 @@ const CustomerHelp = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="customer-help">
-        <div className="help-header">
-          <div className="header-content">
-            <h2>Customer Help Desk</h2>
-            <p>Manage customer support tickets and queries</p>
-          </div>
-        </div>
-        <div className="error-container">
-          <div className="error-icon">⚠️</div>
-          <h3>Error Loading Support Tickets</h3>
-          <p>{error}</p>
-          <button className="btn btn--primary" onClick={fetchSupportQueries}>
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="customer-help">
       <div className="help-header">
-        <div className="header-content">
-          <h2>Customer Help Desk</h2>
-          <p>Manage customer support tickets and queries</p>
+        <h2>Customer Support</h2>
+        <p>Manage customer inquiries and support tickets</p>
+      </div>
+
+      <div className="help-controls">
+        <div className="filters">
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Search tickets..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="status-filter">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All Status</option>
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
         </div>
-        <div className="header-actions">
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Status</option>
-            <option value="open">Open</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-            <option value="closed">Closed</option>
-          </select>
-          <select
-            value={filterPriority}
-            onChange={(e) => setFilterPriority(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">All Priority</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
+
+        <div className="actions">
+          <button className="btn btn--primary">New Ticket</button>
         </div>
       </div>
 
       <div className="help-content">
         <div className="tickets-list">
           <div className="tickets-header">
-            <h3>Support Tickets</h3>
-            <span className="ticket-count">{tickets.length} tickets</span>
+            <h3>Support Tickets ({filteredTickets.length})</h3>
           </div>
 
-          <div className="tickets-container">
-            {tickets.map((ticket) => (
+          <div className="tickets-grid">
+            {filteredTickets.map((ticket) => (
               <div
                 key={ticket.id}
-                className={`ticket-item ${
+                className={`ticket-card ${
                   selectedTicket?.id === ticket.id ? "selected" : ""
                 }`}
                 onClick={() => setSelectedTicket(ticket)}
               >
                 <div className="ticket-header">
-                  <div className="ticket-id">#{ticket.id}</div>
-                  <div className="ticket-meta">
+                  <div className="ticket-id">{ticket.id}</div>
+                  <div className="ticket-status">
                     <span
-                      className={`priority-badge priority-${getPriorityColor(
-                        ticket.priority
-                      )}`}
+                      className="status-badge"
+                      style={{ backgroundColor: getStatusColor(ticket.status) }}
                     >
-                      {ticket.priority}
-                    </span>
-                    <span
-                      className={`status-badge status-${getStatusColor(
-                        ticket.status
-                      )}`}
-                    >
-                      {ticket.status.replace("_", " ")}
+                      {getStatusDisplayName(ticket.status)}
                     </span>
                   </div>
                 </div>
+
                 <div className="ticket-content">
                   <h4 className="ticket-subject">{ticket.subject}</h4>
-                  <p className="ticket-customer">
-                    From: {ticket.customerName} ({ticket.customerEmail})
-                  </p>
-                  <p className="ticket-preview">
+                  <p className="ticket-customer">{ticket.customerName}</p>
+                  <p className="ticket-message">
                     {ticket.message.substring(0, 100)}...
                   </p>
                 </div>
+
                 <div className="ticket-footer">
-                  <span className="ticket-date">
-                    {formatDate(ticket.createdAt)}
-                  </span>
-                  {ticket.assignedTo && (
-                    <span className="ticket-assignee">
-                      Assigned to: {ticket.assignedTo}
+                  <div className="ticket-priority">
+                    <span
+                      className="priority-badge"
+                      style={{
+                        backgroundColor: getPriorityColor(ticket.priority),
+                      }}
+                    >
+                      {getPriorityDisplayName(ticket.priority)}
                     </span>
-                  )}
+                  </div>
+                  <div className="ticket-date">
+                    {new Date(ticket.createdAt).toLocaleDateString()}
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button
-                className="btn btn--secondary"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(currentPage - 1)}
-              >
-                Previous
-              </button>
-              <span className="page-info">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                className="btn btn--secondary"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(currentPage + 1)}
-              >
-                Next
-              </button>
+          {filteredTickets.length === 0 && (
+            <div className="no-tickets">
+              <p>No support tickets found matching your criteria.</p>
             </div>
           )}
         </div>
 
-        <div className="ticket-details">
-          {selectedTicket ? (
-            <div className="ticket-detail-content">
-              <div className="detail-header">
-                <h3>Ticket #{selectedTicket.id}</h3>
-                <div className="detail-meta">
-                  <span
-                    className={`priority-badge priority-${getPriorityColor(
-                      selectedTicket.priority
-                    )}`}
-                  >
-                    {selectedTicket.priority}
-                  </span>
-                  <span
-                    className={`status-badge status-${getStatusColor(
-                      selectedTicket.status
-                    )}`}
-                  >
-                    {selectedTicket.status.replace("_", " ")}
-                  </span>
+        {selectedTicket && (
+          <div className="ticket-detail">
+            <div className="detail-header">
+              <h3>Ticket #{selectedTicket.id}</h3>
+              <button
+                className="btn btn--small btn--secondary"
+                onClick={() => setSelectedTicket(null)}
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="detail-content">
+              <div className="detail-section">
+                <h4>Customer Information</h4>
+                <div className="customer-info">
+                  <p>
+                    <strong>Name:</strong> {selectedTicket.customerName}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {selectedTicket.customerEmail}
+                  </p>
+                  <p>
+                    <strong>Phone:</strong> {selectedTicket.customerPhone}
+                  </p>
                 </div>
               </div>
 
-              <div className="detail-info">
-                <div className="info-row">
-                  <span className="info-label">Customer:</span>
-                  <span className="info-value">
-                    {selectedTicket.customerName}
-                  </span>
+              <div className="detail-section">
+                <h4>Ticket Details</h4>
+                <div className="ticket-info">
+                  <p>
+                    <strong>Subject:</strong> {selectedTicket.subject}
+                  </p>
+                  <p>
+                    <strong>Message:</strong>
+                  </p>
+                  <div className="message-content">
+                    {selectedTicket.message}
+                  </div>
+                  <p>
+                    <strong>Created:</strong>{" "}
+                    {new Date(selectedTicket.createdAt).toLocaleString()}
+                  </p>
                 </div>
-                <div className="info-row">
-                  <span className="info-label">Email:</span>
-                  <span className="info-value">
-                    {selectedTicket.customerEmail}
-                  </span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">Phone:</span>
-                  <span className="info-value">
-                    {selectedTicket.customerPhone}
-                  </span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">Created:</span>
-                  <span className="info-value">
-                    {formatDate(selectedTicket.createdAt)}
-                  </span>
-                </div>
-                {selectedTicket.assignedTo && (
-                  <div className="info-row">
-                    <span className="info-label">Assigned to:</span>
-                    <span className="info-value">
-                      {selectedTicket.assignedTo}
+              </div>
+
+              <div className="detail-section">
+                <h4>Status & Priority</h4>
+                <div className="status-priority">
+                  <div className="status-control">
+                    <label>Status:</label>
+                    <select
+                      value={selectedTicket.status}
+                      onChange={(e) =>
+                        updateTicketStatus(selectedTicket.id, e.target.value)
+                      }
+                    >
+                      <option value="open">Open</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                  </div>
+
+                  <div className="priority-display">
+                    <label>Priority:</label>
+                    <span
+                      className="priority-badge"
+                      style={{
+                        backgroundColor: getPriorityColor(
+                          selectedTicket.priority
+                        ),
+                      }}
+                    >
+                      {getPriorityDisplayName(selectedTicket.priority)}
                     </span>
                   </div>
-                )}
+
+                  <div className="assign-control">
+                    <label>Assigned To:</label>
+                    <select
+                      value={selectedTicket.assignedTo}
+                      onChange={(e) =>
+                        assignTicket(selectedTicket.id, e.target.value)
+                      }
+                    >
+                      <option value="support_team">Support Team</option>
+                      <option value="admin">Admin</option>
+                      <option value="manager">Manager</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
-              <div className="detail-message">
-                <h4>Message</h4>
-                <p>{selectedTicket.message}</p>
-              </div>
-
-              <div className="detail-actions">
-                <div className="action-group">
-                  <label>Update Status:</label>
-                  <select
-                    value={selectedTicket.status}
-                    onChange={(e) =>
-                      updateTicketStatus(selectedTicket.id, e.target.value)
-                    }
-                    className="status-select"
-                  >
-                    <option value="open">Open</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                </div>
-
-                <div className="action-group">
-                  <label>Assign to:</label>
-                  <select
-                    value={selectedTicket.assignedTo || ""}
-                    onChange={(e) =>
-                      assignTicket(selectedTicket.id, e.target.value)
-                    }
-                    className="assign-select"
-                  >
-                    <option value="">Unassigned</option>
-                    <option value="admin">Admin</option>
-                    <option value="support_team">Support Team</option>
-                    <option value="manager">Manager</option>
-                  </select>
-                </div>
-
-                <div className="action-buttons">
-                  <button className="btn btn--primary">Reply</button>
-                  <button className="btn btn--secondary">Add Note</button>
+              <div className="detail-section">
+                <h4>Actions</h4>
+                <div className="ticket-actions">
+                  <button className="btn btn--primary">
+                    Reply to Customer
+                  </button>
+                  <button className="btn btn--secondary">
+                    Mark as Resolved
+                  </button>
                   <button className="btn btn--danger">Close Ticket</button>
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="no-ticket-selected">
-              <div className="no-ticket-icon">💬</div>
-              <h3>Select a Ticket</h3>
-              <p>Choose a ticket from the list to view its details</p>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-
-      {tickets.length === 0 && (
-        <div className="no-tickets">
-          <div className="no-tickets-icon">💬</div>
-          <h3>No tickets found</h3>
-          <p>There are no support tickets matching your current filters.</p>
-        </div>
-      )}
     </div>
   );
 };
