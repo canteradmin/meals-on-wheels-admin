@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -8,92 +8,67 @@ import {
 import Login from "./components/Login";
 import RestaurantRegister from "./components/RestaurantRegister";
 import Dashboard from "./components/Dashboard";
+import { AuthProvider, useAuth } from "./Context";
 import "./styles/global.scss";
 
-// Create authentication context
-const AuthContext = createContext();
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
+// Public Route Component (redirects to dashboard if authenticated)
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Navigate to="/dashboard" /> : children;
+};
 
-  useEffect(() => {
-    // Check authentication status on component mount
-    const authStatus = localStorage.getItem("isAuthenticated") === "true";
-    const userData = localStorage.getItem("user");
-
-    setIsAuthenticated(authStatus);
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-  }, []);
-
-  const login = (userData) => {
-    localStorage.setItem("isAuthenticated", "true");
-    localStorage.setItem("user", JSON.stringify(userData));
-    setIsAuthenticated(true);
-    setUser(userData);
-  };
-
-  const logout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("isAuthenticated");
-    setIsAuthenticated(false);
-    setUser(null);
-  };
-
-  const authValue = {
-    isAuthenticated,
-    user,
-    login,
-    logout,
-  };
+function AppRoutes() {
+  const { isAuthenticated } = useAuth();
 
   return (
-    <AuthContext.Provider value={authValue}>
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/restaurant-register"
+        element={
+          <PublicRoute>
+            <RestaurantRegister />
+          </PublicRoute>
+        }
+      />
+      <Route
+        path="/dashboard/*"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/"
+        element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />}
+      />
+    </Routes>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
       <Router>
         <div className="App">
-          <Routes>
-            <Route
-              path="/login"
-              element={
-                isAuthenticated ? <Navigate to="/dashboard" /> : <Login />
-              }
-            />
-            <Route
-              path="/restaurant-register"
-              element={
-                isAuthenticated ? (
-                  <Navigate to="/dashboard" />
-                ) : (
-                  <RestaurantRegister />
-                )
-              }
-            />
-            <Route
-              path="/dashboard/*"
-              element={
-                isAuthenticated ? <Dashboard /> : <Navigate to="/login" />
-              }
-            />
-            <Route
-              path="/"
-              element={
-                <Navigate to={isAuthenticated ? "/dashboard" : "/login"} />
-              }
-            />
-          </Routes>
+          <AppRoutes />
         </div>
       </Router>
-    </AuthContext.Provider>
+    </AuthProvider>
   );
 }
 

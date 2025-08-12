@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { useAuth } from "../App";
+import { useAuth } from "../Context";
 import Sidebar from "./Sidebar";
 import Overview from "./dashboard/Overview";
 import RecentOrders from "./dashboard/RecentOrders";

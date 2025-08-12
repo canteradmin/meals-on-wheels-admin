@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../App";
+import { useAuth } from "../Context";
 import "./RestaurantRegister.scss";
 
 const RestaurantRegister = () => {
