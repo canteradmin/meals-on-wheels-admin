@@ -1,6 +1,6 @@
 @import "../styles/theme.scss";
 
-.restaurant-register {
+.register-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -14,25 +14,53 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     padding: 40px;
     width: 100%;
-    max-width: 480px;
+    max-width: 600px;
     animation: slideUp 0.6s ease-out;
 
     .register-header {
       text-align: center;
       margin-bottom: 32px;
 
-      .logo {
-        h1 {
-          font-size: 28px;
-          font-weight: 700;
-          color: $secondary;
-          margin-bottom: 8px;
-        }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: $secondary;
+        margin-bottom: 8px;
+      }
 
-        p {
-          font-size: 16px;
-          color: $gray;
-          margin: 0;
+      p {
+        font-size: 16px;
+        color: $gray;
+        margin: 0;
+        line-height: 1.5;
+      }
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 32px;
+      gap: 8px;
+
+      .step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: $lightGray;
+        color: $gray;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+
+        &.active {
+          background: $primary;
+          color: $white;
+          border-color: $primaryHover;
+          transform: scale(1.1);
         }
       }
     }
@@ -40,21 +68,6 @@
     .access-form {
       text-align: center;
 
-      h2 {
-        font-size: 24px;
-        font-weight: 600;
-        color: $secondary;
-        margin-bottom: 12px;
-      }
-
-      p {
-        color: $gray;
-        margin-bottom: 24px;
-        line-height: 1.5;
-      }
-    }
-
-    .register-form {
       .form-group {
         margin-bottom: 20px;
 
@@ -81,6 +94,72 @@
             box-shadow: 0 0 0 3px rgba($primary, 0.1);
           }
 
+          &::placeholder {
+            color: $gray;
+          }
+        }
+      }
+
+      .btn {
+        width: 100%;
+        padding: 14px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+
+        &:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba($primary, 0.3);
+        }
+
+        &:active:not(:disabled) {
+          transform: translateY(0);
+        }
+      }
+    }
+
+    .register-form {
+      .step-content {
+        margin-bottom: 32px;
+
+        h2 {
+          font-size: 20px;
+          font-weight: 600;
+          color: $secondary;
+          margin-bottom: 24px;
+          text-align: center;
+        }
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+
+        label {
+          display: block;
+          margin-bottom: 8px;
+          font-weight: 500;
+          color: $secondary;
+          font-size: 14px;
+        }
+
+        input,
+        textarea {
+          width: 100%;
+          padding: 12px 16px;
+          border: 2px solid $border;
+          border-radius: 8px;
+          font-size: 14px;
+          transition: all 0.2s ease;
+          background-color: $white;
+          font-family: inherit;
+
+          &:focus {
+            outline: none;
+            border-color: $primary;
+            box-shadow: 0 0 0 3px rgba($primary, 0.1);
+          }
+
           &.error {
             border-color: $error;
             box-shadow: 0 0 0 3px rgba($error, 0.1);
@@ -91,11 +170,102 @@
           }
         }
 
+        textarea {
+          resize: vertical;
+          min-height: 100px;
+        }
+
         .error-message {
           color: $error;
           font-size: 12px;
           margin-top: 4px;
           display: block;
+        }
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+
+        @media (max-width: 480px) {
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+      }
+
+      .cuisine-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-top: 8px;
+
+        .cuisine-checkbox {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          padding: 8px 12px;
+          border: 1px solid $border;
+          border-radius: 6px;
+          transition: all 0.2s ease;
+
+          &:hover {
+            border-color: $primary;
+            background: rgba($primary, 0.05);
+          }
+
+          input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+          }
+
+          span {
+            font-size: 14px;
+            color: $secondary;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        margin-top: 32px;
+
+        .btn {
+          padding: 14px 32px;
+          font-size: 16px;
+          font-weight: 600;
+          border-radius: 8px;
+          transition: all 0.3s ease;
+          min-width: 120px;
+
+          &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba($primary, 0.3);
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0);
+          }
+
+          &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+          }
+        }
+
+        .btn--secondary {
+          background: $lightGray;
+          color: $secondary;
+          border: 2px solid $border;
+
+          &:hover {
+            background: darken($lightGray, 5%);
+            border-color: $gray;
+          }
         }
       }
 
@@ -117,47 +287,9 @@
           transform: translateY(0);
         }
 
-        &.loading {
-          position: relative;
-          color: transparent;
-
-          &::after {
-            content: "";
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 2px solid transparent;
-            border-top: 2px solid currentColor;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-          }
-        }
-      }
-    }
-
-    .register-footer {
-      text-align: center;
-      margin-top: 24px;
-      padding-top: 24px;
-      border-top: 1px solid $border;
-
-      p {
-        color: $gray;
-        margin-bottom: 16px;
-        font-size: 14px;
-      }
-
-      .btn {
-        padding: 10px 24px;
-        font-size: 14px;
-        border-radius: 6px;
-        transition: all 0.2s ease;
-
-        &:hover {
-          transform: translateY(-1px);
+        &:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
         }
       }
     }
@@ -175,45 +307,71 @@
   }
 }
 
-@keyframes spin {
-  0% {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
 // Responsive design
 @media (max-width: 768px) {
-  .restaurant-register {
+  .register-container {
     padding: 16px;
 
     .register-card {
       padding: 24px;
 
       .register-header {
-        .logo {
-          h1 {
-            font-size: 24px;
-          }
+        h1 {
+          font-size: 24px;
+        }
 
-          p {
-            font-size: 14px;
-          }
+        p {
+          font-size: 14px;
         }
       }
 
+      .step-indicator {
+        margin-bottom: 24px;
+
+        .step {
+          width: 36px;
+          height: 36px;
+          font-size: 14px;
+        }
+      }
+
+      .access-form,
       .register-form {
+        .step-content {
+          margin-bottom: 24px;
+
+          h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+          }
+        }
+
         .form-group {
           margin-bottom: 16px;
 
-          input {
+          input,
+          textarea {
             padding: 10px 14px;
             font-size: 16px; // Prevent zoom on iOS
           }
         }
 
+        .cuisine-options {
+          grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+          gap: 8px;
+        }
+
+        .form-actions {
+          flex-direction: column;
+          gap: 12px;
+
+          .btn {
+            width: 100%;
+            min-width: auto;
+          }
+        }
+
+        .btn,
         .register-btn {
           padding: 12px 20px;
           font-size: 16px;
@@ -224,17 +382,23 @@
 }
 
 @media (max-width: 480px) {
-  .restaurant-register {
+  .register-container {
     .register-card {
       padding: 20px;
 
       .register-header {
         margin-bottom: 24px;
 
-        .logo {
-          h1 {
-            font-size: 22px;
-          }
+        h1 {
+          font-size: 22px;
+        }
+      }
+
+      .step-indicator {
+        .step {
+          width: 32px;
+          height: 32px;
+          font-size: 12px;
         }
       }
     }

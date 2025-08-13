@@ -9,6 +9,7 @@ import Login from "./components/Login";
 import RestaurantRegister from "./components/RestaurantRegister";
 import Dashboard from "./components/Dashboard";
 import { AuthProvider, useAuth } from "./Context";
+import ContextState from "./Context/ContextStates";
 import "./styles/global.scss";
 
 // Protected Route Component
@@ -62,13 +63,15 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="App">
-          <AppRoutes />
-        </div>
-      </Router>
-    </AuthProvider>
+    <ContextState>
+      <AuthProvider>
+        <Router>
+          <div className="App">
+            <AppRoutes />
+          </div>
+        </Router>
+      </AuthProvider>
+    </ContextState>
   );
 }
 
